@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Peminjaman;
+use App\Models\Anggota;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -50,15 +51,23 @@ class PeminjamanController extends Controller
      */
     public function store(Request $request)
     {
+        $idAnggota = $request->input('id_anggota');
+
+        if (!Anggota::find($idAnggota)) {
+            return response()->json([
+                'error' => [
+                    'message' => 'Anggota dengan ID ' . $idAnggota . ' tidak ditemukan'
+                ]
+            ], 404);
+        }
+
         try {
             $peminjaman = Peminjaman::create($request->all());
 
-            $response = [
+            return response()->json([
                 "message" => "Data peminjaman berhasil ditambahkan",
                 "data" => $peminjaman
-            ];
-
-            return response()->json($response, 201);
+            ], 201);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => [
@@ -72,16 +81,13 @@ class PeminjamanController extends Controller
     {
         try{
             $peminjaman = Peminjaman::findOrFail($id);
-
             $peminjaman->fill($request->all());
             $peminjaman->save();
 
-            $response = [
+            return response()->json([
                 "message" => "Data peminjaman berhasil diperbarui",
                 "data" => $peminjaman
-            ];
-
-            return response()->json($response, 201);
+            ], 201);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => [
@@ -102,11 +108,9 @@ class PeminjamanController extends Controller
             $peminjaman = Peminjaman::findOrFail($id);
             $peminjaman->delete();
 
-            $response = [
+            return response()->json([
                 "message" => "Data Peminjaman Berhasil Dihapus!",
-            ];
-
-            return response()->json($response, 200);
+            ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => [
