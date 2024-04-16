@@ -30,9 +30,17 @@ class PeminjamanController extends Controller
      */
     public function show($id)
     {
-        return response()->json([
-            'data' => Peminjaman::findOrFail($id)
-        ], 200);
+        try {
+            return response()->json([
+                'data' => Peminjaman::findOrFail($id)
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => [
+                    'message' => 'Peminjaman not found'
+                ]
+            ], 404);
+        }
     }
 
      /**
@@ -42,45 +50,45 @@ class PeminjamanController extends Controller
      */
     public function store(Request $request)
     {
-        $peminjaman = Peminjaman::create($request->all());
+        try {
+            $peminjaman = Peminjaman::create($request->all());
 
-        $response = [
-            "message" => "Data peminjaman berhasil ditambahkan",
-            "data" => [
-                "id" => $peminjaman->id,
-                "id_anggota" => $peminjaman->id_anggota,
-                "tanggal_pinjam" => $peminjaman->tanggal_pinjam,
-                "jumlah_pinjam" => $peminjaman->jumlah_pinjam,
-                "status" => $peminjaman->status,
-            ]
-        ];
+            $response = [
+                "message" => "Data peminjaman berhasil ditambahkan",
+                "data" => $peminjaman
+            ];
 
-        return response()->json($response, 201, [
-            'Location' => route('peminjaman.show', ['id' => $peminjaman->id])
-        ]);
+            return response()->json($response, 201);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => [
+                    'message' => 'Peminjaman not found'
+                ]
+            ], 404);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $peminjaman = Peminjaman::findOrFail($id);
+        try{
+            $peminjaman = Peminjaman::findOrFail($id);
 
-        $peminjaman->fill($request->all());
-        $peminjaman->save();
+            $peminjaman->fill($request->all());
+            $peminjaman->save();
 
-        $response = [
-            "message" => "Data peminjaman berhasil diperbarui",
-            "data" => [
-                "id" => $peminjaman->id,
-                "id_anggota" => $peminjaman->id_anggota,
-                "tanggal_pinjam" => $peminjaman->tanggal_pinjam,
-                "jumlah_pinjam" => $peminjaman->jumlah_pinjam,
-                "status" => $peminjaman->status,
-            ]
-        ];
+            $response = [
+                "message" => "Data peminjaman berhasil diperbarui",
+                "data" => $peminjaman
+            ];
 
-        return response()->json($response, 201, [
-            'Location' => route('peminjaman.show', ['id' => $peminjaman->id])
-        ]);
+            return response()->json($response, 201);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => [
+                    'message' => 'Peminjaman not found'
+                ]
+            ], 404);
+        }
     }
 
     /**
@@ -90,14 +98,21 @@ class PeminjamanController extends Controller
      */
     public function destroy($id)
     {
-        $peminjaman = Peminjaman::findOrFail($id);
-        $peminjaman->delete();
-        $response = [
-            "message" => "Data Peminjaman Berhasil Dihapus!",
-        ];
+        try{
+            $peminjaman = Peminjaman::findOrFail($id);
+            $peminjaman->delete();
 
-        return response()->json($response, 200, [
-            'Location' => route('peminjaman.show', ['id' => $peminjaman->id])
-        ]);
+            $response = [
+                "message" => "Data Peminjaman Berhasil Dihapus!",
+            ];
+
+            return response()->json($response, 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => [
+                    'message' => 'Peminjaman not found'
+                ]
+            ], 404);
+        }
     }
 }
