@@ -19,9 +19,17 @@ class PeminjamanController extends Controller
      */
     public function index()
     {
-        return response()->json([
-            'data' => Peminjaman::all()
-        ], 200);
+        try {
+            return response()->json([
+                'data' => Peminjaman::all()
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => [
+                    'message' => 'Peminjaman not found'
+                ]
+            ], 404);
+        }
     }
 
     /**
