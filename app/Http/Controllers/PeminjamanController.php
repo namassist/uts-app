@@ -88,8 +88,15 @@ class PeminjamanController extends Controller
     public function update(Request $request, $id)
     {
         try{
+            $this->validate($request, [
+                'status' => 'required|string|in:pending,selesai',
+            ],[
+                'status.required' => 'status is required',
+                'status.in' => 'Bad Request. Allowed values: pending, selesai.',
+            ]);
+
             $peminjaman = Peminjaman::findOrFail($id);
-            $peminjaman->fill($request->all());
+            $peminjaman->fill($request->only('status'));
             $peminjaman->save();
 
             return response()->json([
