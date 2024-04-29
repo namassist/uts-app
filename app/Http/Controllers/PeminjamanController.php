@@ -59,17 +59,29 @@ class PeminjamanController extends Controller
      */
     public function store(Request $request)
     {
-        $idAnggota = $request->input('id_anggota');
-
-        if (!Anggota::find($idAnggota)) {
-            return response()->json([
-                'error' => [
-                    'message' => 'Anggota dengan ID ' . $idAnggota . ' tidak ditemukan'
-                ]
-            ], 404);
-        }
-
         try {
+            $this->validate($request, [
+                'id_anggota' => 'required',
+                'tanggal_pinjam' => 'required',
+                'jumlah_pinjam' => 'required',
+                'status' => 'required|in:pending,selesai',
+            ],[
+                'id_anggota.required' => 'id_anggota is required',
+                'tanggal_pinjam.required' => 'tanggal_pinjam is required',
+                'jumlah_pinjam.required' => 'jumlah_pinjam is required',
+                'status.required' => 'status is required',
+                'status.in' => 'Bad Request. Allowed values: pending, selesai.',
+            ]);
+
+            $idAnggota = $request->input('id_anggota');
+            if (!Anggota::find($idAnggota)) {
+                return response()->json([
+                    'error' => [
+                        'message' => 'Anggota dengan ID ' . $idAnggota . ' tidak ditemukan'
+                    ]
+                ], 404);
+            }
+
             $peminjaman = Peminjaman::create($request->all());
 
             return response()->json([
@@ -102,7 +114,7 @@ class PeminjamanController extends Controller
             return response()->json([
                 "message" => "Data peminjaman berhasil diperbarui",
                 "data" => $peminjaman
-            ], 201);
+            ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => [
